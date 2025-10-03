@@ -6,9 +6,15 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky",
+    "db:push": "drizzle-kit push --config drizzle.config.ts",
+    "seed": "tsx ./lib/db/seed.ts",
+    "test": "vitest"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
     "better-sqlite3": "^12.4.1",
     "d3": "^7.9.0",
     "drizzle-orm": "^0.44.6",
@@ -39,5 +45,11 @@
     "typescript": "^5",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b"
+  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
 }

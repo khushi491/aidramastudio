@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+drama-studio is an AI engine that auto-generates episodic fantasy/soap-opera stories, renders Instagram-ready carousel frames and a short trailer, and can publish to Instagram via the Instagram Graph API. Built with Next.js 14 (App Router, TS), Tailwind, shadcn/ui, Drizzle + SQLite.
 
 ## Getting Started
 
-First, run the development server:
+Quickstart:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm i
+pnpm dlx shadcn@latest init
+pnpm db:push
+pnpm seed
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Environment variables are defined in `.env.example` with notes for OpenAI and Instagram tokens. Use `MOCK_MODE=true` to simulate IG posting during demos.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Instagram Graph API (overview)
 
-## Learn More
+- Create media containers for each image with `is_carousel_item=true`, then create a carousel container with `children=[...]` and publish via `/media_publish`.
+- For Reels, create a video media container and publish.
+- Required scopes: `instagram_basic`, `instagram_content_publish`, `pages_show_list`.
+- In dev, keep posting minimal; respect rate caps. Use Mock Mode to avoid real posts.
 
-To learn more about Next.js, take a look at the following resources:
+### Demo script (3 min)
+1) Create Episode → Generate (AI) → Render (panels + trailer)
+2) Preview in dashboard
+3) Publish (mock or real IG)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Screenshots placeholders to be added after first render._
