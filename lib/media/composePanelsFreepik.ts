@@ -5,7 +5,7 @@ import { getFreepikService } from '../freepik/freepikService';
 const WIDTH = 1080;
 const HEIGHT = 1350;
 
-export async function composePanelsWithFreepik(episodeId: string, captions: string[], epNumber: number, scriptData: any): Promise<string[]> {
+export async function composePanelsWithFreepik(episodeId: string, captions: string[], epNumber: number, scriptData: Record<string, unknown>): Promise<string[]> {
   const freepikService = getFreepikService();
   
   if (!freepikService) {
