@@ -25,7 +25,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       panelUrls = await composePanels(id, captions, ep?.number ?? 1);
     }
     const panelPaths = panelUrls.map(u => u.replace(process.env.MEDIA_BASE_URL || 'http://localhost:3000', process.cwd() + '/public'));
-    const trailerUrl = await renderTrailer(id, panelPaths, '');
+    const scriptData = ep?.scriptJson ? JSON.parse(ep.scriptJson) : {};
+    const hook = ep?.hook || '';
+    const trailerUrl = await renderTrailer(id, panelPaths, hook, scriptData);
 
     for (const url of panelUrls) {
       await db.insert(media).values({ episodeId: id, type: 'panel', url, width: 1080, height: 1350 });

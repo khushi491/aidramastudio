@@ -78,26 +78,26 @@ function createFreepikPrompt(caption: string, scriptData: any, panelIndex: numbe
   // Add tone-specific comic book styling
   switch (tone) {
     case 'fantasy':
-      basePrompt += ', comic book art style, fantasy comic, bold lines, vibrant colors, magical atmosphere, expressive character design';
+      basePrompt += ', comic book art style, fantasy comic, bold lines, vibrant colors, magical atmosphere, expressive character design, diverse characters, anthropomorphic elements';
       break;
     case 'comedy':
-      basePrompt += ', bright comic book style, cartoon-style, humorous, bold outlines, vibrant colors, exaggerated expressions';
+      basePrompt += ', bright comic book style, cartoon-style, humorous, bold outlines, vibrant colors, exaggerated expressions, diverse character designs, expressive faces';
       break;
     case 'epic':
-      basePrompt += ', epic comic book style, heroic comic art, bold lines, dramatic composition, dynamic poses';
+      basePrompt += ', epic comic book style, heroic comic art, bold lines, dramatic composition, dynamic poses, expressive character reactions';
       break;
     default:
-      basePrompt += ', comic book art style, bold lines, vibrant colors, dynamic composition, expressive characters';
+      basePrompt += ', comic book art style, bold lines, vibrant colors, dynamic composition, expressive characters, diverse character designs';
   }
   
   // Add comic book technical specifications inspired by the reference image
-  basePrompt += ', comic book panel, bold outlines, vibrant colors, high quality, detailed, professional comic art, Instagram story format, vertical composition, speech bubbles, white dialogue bubbles with black outlines, bold uppercase text, expressive character reactions, clean line art, flat coloring, warm color palette, anthropomorphic characters, fantasy elements, dramatic expressions, comic book lettering';
+  basePrompt += ', comic book panel, bold outlines, vibrant colors, high quality, detailed, professional comic art, Instagram story format, vertical composition, speech bubbles, white dialogue bubbles with black outlines, bold uppercase text, expressive character reactions, clean line art, flat coloring, warm color palette, anthropomorphic characters, fantasy elements, dramatic expressions, comic book lettering, continuous narrative flow, diverse character designs, expressive faces, character emotions, dynamic poses, storytelling composition';
   
   return basePrompt;
 }
 
 async function addEpisodeOverlay(imageBuffer: Buffer, caption: string, epNumber: number): Promise<Buffer> {
-  // Create overlay with episode branding - Comic book style with speech bubbles
+  // Create overlay with episode branding - Authentic comic book style with speech bubbles
   const overlaySvg = `
     <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -111,13 +111,14 @@ async function addEpisodeOverlay(imageBuffer: Buffer, caption: string, epNumber:
           <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000000" flood-opacity="0.6"/>
         </filter>
       </defs>
+      
+      <!-- Episode number in corner -->
+      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+      
       <!-- Speech bubble for caption -->
       <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
       <!-- Speech bubble tail -->
       <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
-      
-      <!-- Episode number in corner -->
-      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
       
       <!-- Caption text in speech bubble -->
       <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
@@ -158,19 +159,23 @@ async function createFallbackPanel(episodeId: string, caption: string, epNumber:
       </defs>
       <rect width="100%" height="100%" fill="url(#g)"/>
       
+      <!-- Episode number in corner -->
+      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+      
       <!-- Speech bubble for caption -->
       <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
       <!-- Speech bubble tail -->
       <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
-      
-      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
       
       <!-- Caption text in speech bubble -->
       <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
         ${escapeXml(caption.toUpperCase())}
       </text>
       
+      <!-- Watermark -->
       <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
+      
+      <!-- Placeholder text -->
       <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="32" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#textShadow)">
         Comic Book Style - Freepik API not configured
       </text>
@@ -206,19 +211,23 @@ async function composePanelsFallback(episodeId: string, captions: string[], epNu
         </defs>
         <rect width="100%" height="100%" fill="url(#g)"/>
         
+        <!-- Episode number in corner -->
+        <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+        
         <!-- Speech bubble for caption -->
         <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
         <!-- Speech bubble tail -->
         <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
-        
-        <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
         
         <!-- Caption text in speech bubble -->
         <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
           ${escapeXml(caption.toUpperCase())}
         </text>
         
+        <!-- Watermark -->
         <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
+        
+        <!-- Placeholder text -->
         <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="32" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#textShadow)">
           Comic Book Style - Placeholder
         </text>

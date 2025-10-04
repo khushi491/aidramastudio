@@ -2,9 +2,21 @@
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Freepik API Key (optional - for high-quality image generation)
+# Freepik API Key (required for high-quality image and voice generation)
 # Get your API key from: https://www.freepik.com/api/
-FREEPIK_API_KEY=FPSX8f804a61442e5dd8bb3b283438549990
+# Freepik is now used for both image generation AND voice synthesis
+FREEPIK_API_KEY=FPSX726d6433cf664ecab10bca20081761d4
+FREEPIK_BASE_URL=https://api.freepik.com/v1/ai
+FREEPIK_MAX_WAIT_TIME=10000
+FREEPIK_MAX_ATTEMPTS=30
+FREEPIK_BACKOFF_MULTIPLIER=1.5
+
+# Alternative TTS Services (optional - Freepik is prioritized)
+# Only needed if you want to use alternative voice generation
+# ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+# AZURE_SPEECH_KEY=your_azure_speech_key_here
+# AZURE_REGION=your_azure_region
+# GOOGLE_TTS_KEY=your_google_tts_key_here
 
 # Instagram Graph API (optional - for publishing to Instagram)
 # Get these from: https://developers.facebook.com/
