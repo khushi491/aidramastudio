@@ -2,26 +2,28 @@ import { NextRequest } from 'next/server';
 import { episodeInputSchema } from '@/lib/utils/validators';
 import { getDb, episodes } from '@/lib/db/schema';
 import { logger } from '@/lib/utils/logger';
+import { generateEpisode } from '@/lib/ai/generateEpisode';
+import { mergeWithPriorSynopsis, ensureCaptionsLength } from '@/lib/ai/postProcess';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const json = await req.json();
     const input = episodeInputSchema.parse(json);
-    // Stub AI output until implemented
-    const script = {
-      episodeTitle: `Episode ${input.episodeNumber}`,
-      synopsis: 'A dramatic turn of events unfolds beneath the city.',
-      beats: ['Beat 1', 'Beat 2', 'Beat 3', 'Beat 4', 'Beat 5', 'Beat 6'],
-      dialogs: [],
-      captions: ['Caption 1', 'Caption 2', 'Caption 3', 'Caption 4', 'Caption 5', 'Caption 6'],
-      relationships: [],
-      cliffhanger: 'To be continued...'
-    };
-
+    // Pull prior synopsis if available (simple query by seriesId + number-1)
     const db = getDb();
+    let priorSynopsis: string | undefined;
+    try {
+      const prior = await db.execute<any>(`select synopsis from Episode where seriesId = ? and number = ? limit 1`, [input.seriesTitle, input.episodeNumber - 1]);
+      if ((prior as any)?.rows?.[0]?.synopsis) priorSynopsis = (prior as any).rows[0].synopsis as string;
+    } catch {}
+
+    const ai = await generateEpisode(input, priorSynopsis);
+    const merged = mergeWithPriorSynopsis(ai, priorSynopsis);
+    merged.captions = ensureCaptionsLength(merged.captions);
+
     await db
       .insert(episodes)
       .values({
@@ -32,9 +34,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         tone: input.tone,
         setting: input.setting,
         language: input.language,
-        scriptJson: JSON.stringify(script),
-        captionsJson: JSON.stringify(script.captions),
-        synopsis: script.synopsis,
+        scriptJson: JSON.stringify(merged),
+        captionsJson: JSON.stringify(merged.captions),
+        synopsis: merged.synopsis,
         status: 'draft',
       })
       .onConflictDoUpdate({
@@ -45,17 +47,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           tone: input.tone,
           setting: input.setting,
           language: input.language,
-          scriptJson: JSON.stringify(script),
-          captionsJson: JSON.stringify(script.captions),
-          synopsis: script.synopsis,
+          scriptJson: JSON.stringify(merged),
+          captionsJson: JSON.stringify(merged.captions),
+          synopsis: merged.synopsis,
         },
       });
 
-    return new Response(JSON.stringify({ id, ...input, script }), { status: 200 });
+    return new Response(JSON.stringify({ id, ...input, script: merged }), { status: 200 });
   } catch (err: any) {
     logger.error('generate episode failed', { error: String(err) });
     return new Response(JSON.stringify({ error: 'Invalid input or server error' }), { status: 400 });
   }
 }
+
 
 

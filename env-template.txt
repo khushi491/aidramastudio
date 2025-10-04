@@ -1,0 +1,22 @@
+# Copy this file to .env.local and update the values
+
+# OpenAI API Key (required for AI generation)
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Instagram Graph API (optional - for publishing to Instagram)
+# Get these from: https://developers.facebook.com/
+INSTAGRAM_APP_ID=your_instagram_app_id_here
+INSTAGRAM_APP_SECRET=your_instagram_app_secret_here
+INSTAGRAM_ACCESS_TOKEN=your_instagram_access_token_here
+
+# Mock Mode (set to true to simulate Instagram posting without actually posting)
+# Set to false when you have real Instagram credentials
+MOCK_MODE=true
+
+# Media Base URL (optional - defaults to http://localhost:3000)
+# Change this when deploying to production
+MEDIA_BASE_URL=http://localhost:3000
+
+# Database (SQLite file will be created automatically)
+# No additional configuration needed for SQLite

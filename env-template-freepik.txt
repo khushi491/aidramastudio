@@ -1,0 +1,21 @@
+# OpenAI API Key (required for AI generation)
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Freepik API Key (optional - for high-quality image generation)
+# Get your API key from: https://www.freepik.com/api/
+FREEPIK_API_KEY=FPSX8f804a61442e5dd8bb3b283438549990
+
+# Instagram Graph API (optional - for publishing to Instagram)
+# Get these from: https://developers.facebook.com/
+FB_APP_ID=your_instagram_app_id_here
+FB_APP_SECRET=your_instagram_app_secret_here
+FB_USER_ACCESS_TOKEN=your_instagram_access_token_here
+IG_USER_ID=your_instagram_user_id_here
+IG_GRAPH_API_VERSION=v19.0
+
+# Mock Mode (set to false to use real AI generation)
+MOCK_MODE=false
+
+# Media Base URL (optional - defaults to http://localhost:3000)
+MEDIA_BASE_URL=http://localhost:3000

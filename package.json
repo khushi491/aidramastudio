@@ -8,11 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky",
     "db:push": "drizzle-kit push --config drizzle.config.ts",
-    "seed": "tsx ./lib/db/seed.ts",
-    "test": "vitest"
-  },
+    "seed": "tsx ./lib/db/seed.ts"
+    },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "better-sqlite3": "^12.4.1",
@@ -31,13 +29,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.5",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
@@ -50,6 +48,14 @@
     "**/*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write",
       "eslint --fix"
+    ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "sharp",
+      "ffmpeg-static",
+      "@tailwindcss/oxide"
     ]
   }
 }

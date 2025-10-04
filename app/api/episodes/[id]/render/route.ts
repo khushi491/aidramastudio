@@ -1,18 +1,32 @@
 import { NextRequest } from 'next/server';
-import { getDb, media } from '@/lib/db/schema';
+import { getDb, episodes, media } from '@/lib/db/schema';
 import { logger } from '@/lib/utils/logger';
+import { composePanels } from '@/lib/media/composePanels';
+import { composePanelsWithFreepik } from '@/lib/media/composePanelsFreepik';
+import { renderTrailer } from '@/lib/media/renderTrailer';
+import { eq } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
 
-export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
-    // Stub URLs for now; real implementation composes images and trailer
-    const base = `/generated/${id}`;
-    const panelUrls = Array.from({ length: 6 }).map((_, i) => `${base}/ep-${id}-p${i + 1}.jpg`);
-    const trailerUrl = `${base}/ep-${id}-trailer.mp4`;
-
+    const { id } = await params;
     const db = getDb();
+    const ep = (await db.select().from(episodes).where(eq(episodes.id, id))).at(0);
+    const captions: string[] = ep?.captionsJson ? JSON.parse(ep.captionsJson) : new Array(6).fill('Panel');
+    
+    // Try Freepik first, fallback to placeholder if not configured
+    let panelUrls: string[];
+    try {
+      const scriptData = ep?.scriptJson ? JSON.parse(ep.scriptJson) : {};
+      panelUrls = await composePanelsWithFreepik(id, captions, ep?.number ?? 1, scriptData);
+    } catch (error) {
+      logger.warn('Freepik generation failed, using fallback', { error: String(error) });
+      panelUrls = await composePanels(id, captions, ep?.number ?? 1);
+    }
+    const panelPaths = panelUrls.map(u => u.replace(process.env.MEDIA_BASE_URL || 'http://localhost:3000', process.cwd() + '/public'));
+    const trailerUrl = await renderTrailer(id, panelPaths, '');
+
     for (const url of panelUrls) {
       await db.insert(media).values({ episodeId: id, type: 'panel', url, width: 1080, height: 1350 });
     }
@@ -24,5 +38,6 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
     return new Response(JSON.stringify({ error: 'Render failed' }), { status: 500 });
   }
 }
+
 
 
