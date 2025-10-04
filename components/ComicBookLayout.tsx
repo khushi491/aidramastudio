@@ -42,6 +42,7 @@ export default function ComicBookLayout({ panels, title, episodeNumber, onClose 
 
   return (
     <div className="glass rounded-3xl p-8">
+
       {/* Book Header */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold gradient-text mb-2">📚 Comic Book</h2>

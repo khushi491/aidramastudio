@@ -319,31 +319,31 @@ async function renderCinematicVideo(episodeId: string, frames: string[], audioTr
     }
     
     // Configure video output with cinematic quality
+    const outputOptions = [
+      '-r 30',
+      '-pix_fmt yuv420p',
+      '-crf 16', // Even higher quality
+      '-preset slow', // Better compression
+      '-profile:v high',
+      '-level 4.0',
+      '-movflags +faststart', // Optimize for streaming
+      '-shortest',
+      '-b:a 192k', // Higher audio quality
+      '-ac 2',
+      '-ar 48000' // Higher sample rate
+    ];
+    
+    // Add mapping options
+    if (audioTracks.voice || audioTracks.music) {
+      outputOptions.push('-map [video]', '-map [audio]');
+    } else {
+      outputOptions.push('-map [video]');
+    }
+    
     cmd
       .videoCodec('libx264')
-      .outputOptions([
-        '-r 30',
-        '-pix_fmt yuv420p',
-        '-crf 16', // Even higher quality
-        '-preset slow', // Better compression
-        '-profile:v high',
-        '-level 4.0',
-        '-movflags +faststart', // Optimize for streaming
-        '-shortest'
-      ])
       .audioCodec('aac')
-      .audioOptions([
-        '-b:a 192k', // Higher audio quality
-        '-ac 2',
-        '-ar 48000' // Higher sample rate
-      ]);
-    
-    // Map outputs
-    if (audioTracks.voice || audioTracks.music) {
-      cmd.outputOptions(['-map [video]', '-map [audio]']);
-    } else {
-      cmd.outputOptions(['-map [video]']);
-    }
+      .outputOptions(outputOptions);
     
     cmd
       .on('end', () => {

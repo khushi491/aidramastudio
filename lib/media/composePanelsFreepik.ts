@@ -97,9 +97,16 @@ function createFreepikPrompt(caption: string, scriptData: any, panelIndex: numbe
 }
 
 async function addEpisodeOverlay(imageBuffer: Buffer, caption: string, epNumber: number): Promise<Buffer> {
+  // Get the actual dimensions of the Freepik image
+  const imageMetadata = await sharp(imageBuffer).metadata();
+  const actualWidth = imageMetadata.width || WIDTH;
+  const actualHeight = imageMetadata.height || HEIGHT;
+  
+  console.log(`Freepik image dimensions: ${actualWidth}x${actualHeight}, expected: ${WIDTH}x${HEIGHT}`);
+  
   // Create overlay with episode branding - Authentic comic book style with speech bubbles
   const overlaySvg = `
-    <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+    <svg width="${actualWidth}" height="${actualHeight}" viewBox="0 0 ${actualWidth} ${actualHeight}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.8"/>
@@ -113,20 +120,20 @@ async function addEpisodeOverlay(imageBuffer: Buffer, caption: string, epNumber:
       </defs>
       
       <!-- Episode number in corner -->
-      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+      <text x="${actualWidth - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
       
       <!-- Speech bubble for caption -->
-      <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
+      <ellipse cx="${actualWidth/2}" cy="${actualHeight - 180}" rx="${actualWidth/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
       <!-- Speech bubble tail -->
-      <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
+      <polygon points="${actualWidth/2 - 20},${actualHeight - 100} ${actualWidth/2 + 20},${actualHeight - 100} ${actualWidth/2},${actualHeight - 80}" fill="white" stroke="#000000" stroke-width="4"/>
       
       <!-- Caption text in speech bubble -->
-      <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
+      <text x="${actualWidth/2}" y="${actualHeight - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
         ${escapeXml(caption.toUpperCase())}
       </text>
       
       <!-- Watermark -->
-      <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
+      <text x="60" y="${actualHeight - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
     </svg>
   `;
   
