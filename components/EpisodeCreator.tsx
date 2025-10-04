@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import ComicBookLayout from './ComicBookLayout';
 
 export default function EpisodeCreator() {
   const [episodeId, setEpisodeId] = useState<string>('ep1');
@@ -16,6 +17,7 @@ export default function EpisodeCreator() {
   const [publishResp, setPublishResp] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'preview' | 'publish'>('create');
+  const [viewMode, setViewMode] = useState<'grid' | 'book'>('grid');
 
   async function callGenerate() {
     setLoading('generate');
@@ -302,33 +304,73 @@ export default function EpisodeCreator() {
           
           {rendered && (
             <div className="space-y-6">
-              <div className="glass rounded-2xl p-6">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span>🎨</span>
-                  Comic Panels
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {rendered.panels.map((p, index)=> (
-                    <div key={p} className="aspect-[4/5] bg-gray-800 rounded-xl overflow-hidden card-hover group">
-                      <img 
-                        src={p} 
-                        alt={`Panel ${index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                        <div className="text-center">
-                          <div className="spinner mx-auto mb-2"></div>
-                          Loading...
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              {/* View Mode Toggle */}
+              <div className="flex justify-center mb-6">
+                <div className="glass rounded-2xl p-1 flex">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-6 py-3 rounded-xl transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="mr-2">🔲</span>
+                    Grid View
+                  </button>
+                  <button
+                    onClick={() => setViewMode('book')}
+                    className={`px-6 py-3 rounded-xl transition-all ${
+                      viewMode === 'book'
+                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="mr-2">📚</span>
+                    Book View
+                  </button>
                 </div>
               </div>
+
+              {/* Grid View */}
+              {viewMode === 'grid' && (
+                <div className="glass rounded-2xl p-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>🎨</span>
+                    Comic Panels
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {rendered.panels.map((p, index)=> (
+                      <div key={p} className="aspect-[4/5] bg-gray-800 rounded-xl overflow-hidden card-hover group">
+                        <img 
+                          src={p} 
+                          alt={`Panel ${index + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="hidden w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                          <div className="text-center">
+                            <div className="spinner mx-auto mb-2"></div>
+                            Loading...
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Book View */}
+              {viewMode === 'book' && (
+                <ComicBookLayout 
+                  panels={rendered.panels} 
+                  title={seriesTitle}
+                  episodeNumber={episodeNumber}
+                />
+              )}
               
               <div className="glass rounded-2xl p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
