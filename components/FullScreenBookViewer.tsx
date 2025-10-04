@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { usePagination } from '../hooks/usePagination';
 
 interface FullScreenBookViewerProps {
   panels: string[];
@@ -9,38 +10,21 @@ interface FullScreenBookViewerProps {
 }
 
 export default function FullScreenBookViewer({ panels, title, episodeNumber, onClose }: FullScreenBookViewerProps) {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [bookOpen, setBookOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   
-  // Group panels into pages (2 panels per page for book format)
-  const pages = [];
-  for (let i = 0; i < panels.length; i += 2) {
-    pages.push(panels.slice(i, i + 2));
-  }
-  
-  const totalPages = pages.length;
-  const isFirstPage = currentPage === 0;
-  const isLastPage = currentPage === totalPages - 1;
+  const {
+    currentPage,
+    isFlipping,
+    pages,
+    totalPages,
+    isFirstPage,
+    isLastPage,
+    nextPage,
+    prevPage
+  } = usePagination(panels);
 
-  const nextPage = () => {
-    if (currentPage < totalPages - 1 && !isFlipping) {
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage + 1);
-        setIsFlipping(false);
-      }, 300);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 0 && !isFlipping) {
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage - 1);
-        setIsFlipping(false);
-      }, 300);
-    }
+  const handleImageError = (panelIndex: number) => {
+    setImageErrors(prev => new Set(prev).add(panelIndex));
   };
 
   // Keyboard navigation
@@ -80,11 +64,22 @@ export default function FullScreenBookViewer({ panels, title, episodeNumber, onC
               
               {pages[currentPage] && pages[currentPage][0] && (
                 <div className="aspect-[4/5] max-w-lg mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
-                  <img 
-                    src={pages[currentPage][0]} 
-                    alt={`Panel ${currentPage * 2 + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {imageErrors.has(currentPage * 2) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <div className="text-center text-gray-500">
+                        <div className="text-6xl mb-4">🖼️</div>
+                        <div className="text-xl">Image failed to load</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={pages[currentPage][0]} 
+                      alt={`Panel ${currentPage * 2 + 1} of ${title} Episode ${episodeNumber}`}
+                      className="w-full h-full object-cover"
+                      onError={() => handleImageError(currentPage * 2)}
+                      loading="lazy"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -96,11 +91,22 @@ export default function FullScreenBookViewer({ panels, title, episodeNumber, onC
             <div className="flex-1 p-12 flex flex-col justify-center">
               {pages[currentPage] && pages[currentPage][1] ? (
                 <div className="aspect-[4/5] max-w-lg mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
-                  <img 
-                    src={pages[currentPage][1]} 
-                    alt={`Panel ${currentPage * 2 + 2}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {imageErrors.has(currentPage * 2 + 1) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <div className="text-center text-gray-500">
+                        <div className="text-6xl mb-4">🖼️</div>
+                        <div className="text-xl">Image failed to load</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={pages[currentPage][1]} 
+                      alt={`Panel ${currentPage * 2 + 2} of ${title} Episode ${episodeNumber}`}
+                      className="w-full h-full object-cover"
+                      onError={() => handleImageError(currentPage * 2 + 1)}
+                      loading="lazy"
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="aspect-[4/5] max-w-lg mx-auto bg-gray-100 rounded-xl shadow-2xl flex items-center justify-center">
@@ -122,40 +128,43 @@ export default function FullScreenBookViewer({ panels, title, episodeNumber, onC
         </div>
         
         {/* Navigation Controls */}
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none" role="navigation" aria-label="Page navigation">
           {/* Left Arrow */}
           <button
             onClick={prevPage}
             disabled={isFirstPage || isFlipping}
+            aria-label="Previous page"
             className={`absolute left-8 top-1/2 transform -translate-y-1/2 w-16 h-16 rounded-full glass flex items-center justify-center pointer-events-auto transition-all ${
               isFirstPage || isFlipping 
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'hover:bg-white/20 hover:scale-110'
             }`}
           >
-            <span className="text-3xl">←</span>
+            <span className="text-3xl" aria-hidden="true">←</span>
           </button>
           
           {/* Right Arrow */}
           <button
             onClick={nextPage}
             disabled={isLastPage || isFlipping}
+            aria-label="Next page"
             className={`absolute right-8 top-1/2 transform -translate-y-1/2 w-16 h-16 rounded-full glass flex items-center justify-center pointer-events-auto transition-all ${
               isLastPage || isFlipping 
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'hover:bg-white/20 hover:scale-110'
             }`}
           >
-            <span className="text-3xl">→</span>
+            <span className="text-3xl" aria-hidden="true">→</span>
           </button>
         </div>
         
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="Close full screen viewer"
           className="absolute top-6 right-6 w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/20 transition-all"
         >
-          <span className="text-2xl">×</span>
+          <span className="text-2xl" aria-hidden="true">×</span>
         </button>
         
         {/* Keyboard Instructions */}

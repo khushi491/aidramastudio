@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import FullScreenBookViewer from './FullScreenBookViewer';
+import { usePagination } from '../hooks/usePagination';
 
 interface ComicBookLayoutProps {
   panels: string[];
@@ -10,38 +11,22 @@ interface ComicBookLayoutProps {
 }
 
 export default function ComicBookLayout({ panels, title, episodeNumber, onClose }: ComicBookLayoutProps) {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
   const [showFullScreen, setShowFullScreen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   
-  // Group panels into pages (2 panels per page for book format)
-  const pages = [];
-  for (let i = 0; i < panels.length; i += 2) {
-    pages.push(panels.slice(i, i + 2));
-  }
-  
-  const totalPages = pages.length;
-  const isFirstPage = currentPage === 0;
-  const isLastPage = currentPage === totalPages - 1;
+  const {
+    currentPage,
+    isFlipping,
+    pages,
+    totalPages,
+    isFirstPage,
+    isLastPage,
+    nextPage,
+    prevPage
+  } = usePagination(panels);
 
-  const nextPage = () => {
-    if (currentPage < totalPages - 1 && !isFlipping) {
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage + 1);
-        setIsFlipping(false);
-      }, 300);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 0 && !isFlipping) {
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage - 1);
-        setIsFlipping(false);
-      }, 300);
-    }
+  const handleImageError = (panelIndex: number) => {
+    setImageErrors(prev => new Set(prev).add(panelIndex));
   };
 
   if (showFullScreen) {
@@ -87,11 +72,22 @@ export default function ComicBookLayout({ panels, title, episodeNumber, onClose 
               
               {pages[currentPage] && pages[currentPage][0] && (
                 <div className="aspect-[4/5] max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-                  <img 
-                    src={pages[currentPage][0]} 
-                    alt={`Panel ${currentPage * 2 + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {imageErrors.has(currentPage * 2) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <div className="text-center text-gray-500">
+                        <div className="text-4xl mb-2">🖼️</div>
+                        <div className="text-sm">Image failed to load</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={pages[currentPage][0]} 
+                      alt={`Panel ${currentPage * 2 + 1} of ${title} Episode ${episodeNumber}`}
+                      className="w-full h-full object-cover"
+                      onError={() => handleImageError(currentPage * 2)}
+                      loading="lazy"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -103,11 +99,22 @@ export default function ComicBookLayout({ panels, title, episodeNumber, onClose 
             <div className="flex-1 p-8 flex flex-col justify-center">
               {pages[currentPage] && pages[currentPage][1] ? (
                 <div className="aspect-[4/5] max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-                  <img 
-                    src={pages[currentPage][1]} 
-                    alt={`Panel ${currentPage * 2 + 2}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {imageErrors.has(currentPage * 2 + 1) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <div className="text-center text-gray-500">
+                        <div className="text-4xl mb-2">🖼️</div>
+                        <div className="text-sm">Image failed to load</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={pages[currentPage][1]} 
+                      alt={`Panel ${currentPage * 2 + 2} of ${title} Episode ${episodeNumber}`}
+                      className="w-full h-full object-cover"
+                      onError={() => handleImageError(currentPage * 2 + 1)}
+                      loading="lazy"
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="aspect-[4/5] max-w-sm mx-auto bg-gray-100 rounded-lg shadow-lg flex items-center justify-center">
@@ -129,29 +136,31 @@ export default function ComicBookLayout({ panels, title, episodeNumber, onClose 
         </div>
         
         {/* Navigation Controls */}
-        <div className="flex justify-center gap-4 mt-6">
+        <div className="flex justify-center gap-4 mt-6" role="navigation" aria-label="Page navigation">
           <button
             onClick={prevPage}
             disabled={isFirstPage || isFlipping}
+            aria-label="Previous page"
             className={`w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${
               isFirstPage || isFlipping 
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'hover:bg-white/20 hover:scale-110'
             }`}
           >
-            <span className="text-2xl">←</span>
+            <span className="text-2xl" aria-hidden="true">←</span>
           </button>
           
           <button
             onClick={nextPage}
             disabled={isLastPage || isFlipping}
+            aria-label="Next page"
             className={`w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${
               isLastPage || isFlipping 
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'hover:bg-white/20 hover:scale-110'
             }`}
           >
-            <span className="text-2xl">→</span>
+            <span className="text-2xl" aria-hidden="true">→</span>
           </button>
         </div>
         
@@ -159,9 +168,10 @@ export default function ComicBookLayout({ panels, title, episodeNumber, onClose 
         {onClose && (
           <button
             onClick={onClose}
+            aria-label="Close comic book viewer"
             className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/20 transition-all"
           >
-            <span className="text-xl">×</span>
+            <span className="text-xl" aria-hidden="true">×</span>
           </button>
         )}
         
