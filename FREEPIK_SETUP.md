@@ -36,7 +36,7 @@ Then edit `.env.local` with your actual API keys.
 ## 🚀 How It Works
 
 ### Automatic Fallback System
-- **With Freepik API**: Generates high-quality cinematic images
+- **With Freepik API**: Generates high-quality comic book style images
 - **Without Freepik API**: Falls back to placeholder images
 - **On API Failure**: Gracefully falls back to placeholders
 
@@ -50,9 +50,9 @@ Then edit `.env.local` with your actual API keys.
 ### Prompt Engineering
 The system creates intelligent prompts like:
 ```
-Cinematic scene: A key goes missing, set in NYC Subway Kingdom, 
-featuring Lena and Mako, fantasy art style, magical atmosphere, 
-dramatic lighting, high quality, detailed, professional, 
+Comic book panel: A key goes missing, set in NYC Subway Kingdom, 
+featuring Lena and Mako, comic book art style, fantasy comic, bold lines, 
+vibrant colors, magical atmosphere, high quality, detailed, professional comic art, 
 Instagram story format, vertical composition
 ```
 
@@ -60,7 +60,7 @@ Instagram story format, vertical composition
 
 - **Professional Quality**: Real AI-generated images instead of placeholders
 - **Contextual Content**: Images match your episode's theme, characters, and setting
-- **Cinematic Style**: Optimized for social media storytelling
+- **Comic Book Style**: Optimized for social media storytelling
 - **Automatic Branding**: Episode numbers and studio branding added automatically
 - **Graceful Fallback**: Works even without Freepik API configured
 
@@ -112,7 +112,7 @@ tail -f logs/app.log | grep -i freepik
 ## 🎬 Example Results
 
 With Freepik integration, your episodes will have:
-- **Cinematic panels** that match your story's mood
+- **Comic book panels** that match your story's mood
 - **Character-appropriate visuals** based on your cast
 - **Setting-specific backgrounds** (subway, forest, etc.)
 - **Professional quality** ready for Instagram

@@ -15,8 +15,8 @@ export async function composePanelsWithFreepik(episodeId: string, captions: stri
 
   const urls: string[] = [];
   
-  // Generate only 1 panel for testing
-  for (let i = 0; i < 1; i++) {
+  // Generate all 6 panels for the episode
+  for (let i = 0; i < 6; i++) {
     const caption = captions[i] ?? `Panel ${i + 1}`;
     
     try {
@@ -27,7 +27,7 @@ export async function composePanelsWithFreepik(episodeId: string, captions: stri
       const imageUrl = await freepikService.generateImage({
         prompt,
         aspect_ratio: 'social_post_4_5', // 4:5 aspect ratio for Instagram posts
-        style: 'cinematic',
+        style: 'cartoon',
         quality: 'high'
       });
       
@@ -64,8 +64,8 @@ function createFreepikPrompt(caption: string, scriptData: any, panelIndex: numbe
   // Extract character names from the characters string
   const characterNames = characters ? characters.split(',').map((c: string) => c.trim().split(' ')[0]) : [];
   
-  // Create a cinematic prompt based on the episode context
-  let basePrompt = `Cinematic scene: ${caption}`;
+  // Create a comic book style prompt based on the episode context
+  let basePrompt = `Comic book panel: ${caption}`;
   
   if (setting) {
     basePrompt += `, set in ${setting}`;
@@ -75,23 +75,23 @@ function createFreepikPrompt(caption: string, scriptData: any, panelIndex: numbe
     basePrompt += `, featuring ${characterNames.join(' and ')}`;
   }
   
-  // Add tone-specific styling
+  // Add tone-specific comic book styling
   switch (tone) {
     case 'fantasy':
-      basePrompt += ', fantasy art style, magical atmosphere, dramatic lighting';
+      basePrompt += ', comic book art style, fantasy comic, bold lines, vibrant colors, magical atmosphere';
       break;
     case 'comedy':
-      basePrompt += ', bright and colorful, cartoon-style, humorous';
+      basePrompt += ', bright comic book style, cartoon-style, humorous, bold outlines, vibrant colors';
       break;
     case 'epic':
-      basePrompt += ', epic cinematic style, grand scale, heroic';
+      basePrompt += ', epic comic book style, heroic comic art, bold lines, dramatic composition';
       break;
     default:
-      basePrompt += ', dramatic cinematic style, professional photography';
+      basePrompt += ', comic book art style, bold lines, vibrant colors, dynamic composition';
   }
   
-  // Add technical specifications
-  basePrompt += ', high quality, detailed, professional, Instagram story format, vertical composition';
+  // Add comic book technical specifications
+  basePrompt += ', comic book panel, bold outlines, vibrant colors, high quality, detailed, professional comic art, Instagram story format, vertical composition';
   
   return basePrompt;
 }
@@ -134,8 +134,8 @@ async function createFallbackPanel(episodeId: string, caption: string, epNumber:
         ${escapeXml(caption)}
       </text>
       <text x="70" y="${HEIGHT - 40}" fill="#a1a1aa" font-size="22" font-family="Inter, sans-serif">@drama.studio</text>
-      <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="24" font-family="Inter, sans-serif">
-        Freepik API not configured
+      <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="24" font-family="Inter, sans-serif" font-weight="bold">
+        Comic Book Style - Freepik API not configured
       </text>
     </svg>
   `;
@@ -147,8 +147,8 @@ async function createFallbackPanel(episodeId: string, caption: string, epNumber:
 // Fallback function (original implementation)
 async function composePanelsFallback(episodeId: string, captions: string[], epNumber: number): Promise<string[]> {
   const urls: string[] = [];
-  // Generate only 1 panel for testing
-  for (let i = 0; i < 1; i++) {
+  // Generate all 6 panels for the episode
+  for (let i = 0; i < 6; i++) {
     const caption = captions[i] ?? `Panel ${i + 1}`;
     const svg = `
       <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
@@ -165,6 +165,9 @@ async function composePanelsFallback(episodeId: string, captions: string[], epNu
           ${escapeXml(caption)}
         </text>
         <text x="70" y="${HEIGHT - 40}" fill="#a1a1aa" font-size="22" font-family="Inter, sans-serif">@drama.studio</text>
+        <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="24" font-family="Inter, sans-serif" font-weight="bold">
+          Comic Book Style - Placeholder
+        </text>
       </svg>
     `;
     const buf = await sharp(Buffer.from(svg)).jpeg({ quality: 85 }).toBuffer();
