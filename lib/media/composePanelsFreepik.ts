@@ -78,34 +78,54 @@ function createFreepikPrompt(caption: string, scriptData: any, panelIndex: numbe
   // Add tone-specific comic book styling
   switch (tone) {
     case 'fantasy':
-      basePrompt += ', comic book art style, fantasy comic, bold lines, vibrant colors, magical atmosphere';
+      basePrompt += ', comic book art style, fantasy comic, bold lines, vibrant colors, magical atmosphere, expressive character design';
       break;
     case 'comedy':
-      basePrompt += ', bright comic book style, cartoon-style, humorous, bold outlines, vibrant colors';
+      basePrompt += ', bright comic book style, cartoon-style, humorous, bold outlines, vibrant colors, exaggerated expressions';
       break;
     case 'epic':
-      basePrompt += ', epic comic book style, heroic comic art, bold lines, dramatic composition';
+      basePrompt += ', epic comic book style, heroic comic art, bold lines, dramatic composition, dynamic poses';
       break;
     default:
-      basePrompt += ', comic book art style, bold lines, vibrant colors, dynamic composition';
+      basePrompt += ', comic book art style, bold lines, vibrant colors, dynamic composition, expressive characters';
   }
   
-  // Add comic book technical specifications
-  basePrompt += ', comic book panel, bold outlines, vibrant colors, high quality, detailed, professional comic art, Instagram story format, vertical composition';
+  // Add comic book technical specifications inspired by the reference image
+  basePrompt += ', comic book panel, bold outlines, vibrant colors, high quality, detailed, professional comic art, Instagram story format, vertical composition, speech bubbles, white dialogue bubbles with black outlines, bold uppercase text, expressive character reactions, clean line art, flat coloring, warm color palette, anthropomorphic characters, fantasy elements, dramatic expressions, comic book lettering';
   
   return basePrompt;
 }
 
 async function addEpisodeOverlay(imageBuffer: Buffer, caption: string, epNumber: number): Promise<Buffer> {
-  // Create overlay with episode branding
+  // Create overlay with episode branding - Comic book style with speech bubbles
   const overlaySvg = `
     <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="40" y="${HEIGHT - 260}" width="${WIDTH - 80}" height="200" rx="16" fill="rgba(0,0,0,0.7)" />
-      <text x="${WIDTH - 120}" y="80" text-anchor="end" fill="#ffffff" font-size="44" font-family="Inter, sans-serif" font-weight="bold">Ep ${epNumber}</text>
-      <text x="70" y="${HEIGHT - 200}" fill="#ffffff" font-size="32" font-family="Inter, sans-serif" font-weight="600">
-        ${escapeXml(caption)}
+      <defs>
+        <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.8"/>
+        </filter>
+        <filter id="episodeShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="4" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.9"/>
+        </filter>
+        <filter id="speechBubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000000" flood-opacity="0.6"/>
+        </filter>
+      </defs>
+      <!-- Speech bubble for caption -->
+      <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
+      <!-- Speech bubble tail -->
+      <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
+      
+      <!-- Episode number in corner -->
+      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+      
+      <!-- Caption text in speech bubble -->
+      <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
+        ${escapeXml(caption.toUpperCase())}
       </text>
-      <text x="70" y="${HEIGHT - 40}" fill="#a1a1aa" font-size="22" font-family="Inter, sans-serif">@drama.studio</text>
+      
+      <!-- Watermark -->
+      <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
     </svg>
   `;
   
@@ -126,15 +146,32 @@ async function createFallbackPanel(episodeId: string, caption: string, epNumber:
           <stop offset="0%" stop-color="#0a0a0a"/>
           <stop offset="100%" stop-color="#1f1f1f"/>
         </linearGradient>
+        <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.8"/>
+        </filter>
+        <filter id="episodeShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="4" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.9"/>
+        </filter>
+        <filter id="speechBubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000000" flood-opacity="0.6"/>
+        </filter>
       </defs>
       <rect width="100%" height="100%" fill="url(#g)"/>
-      <rect x="40" y="${HEIGHT - 260}" width="${WIDTH - 80}" height="200" rx="16" fill="rgba(0,0,0,0.55)" />
-      <text x="${WIDTH - 120}" y="80" text-anchor="end" fill="#ffffff" font-size="44" font-family="Inter, sans-serif">Ep ${epNumber}</text>
-      <text x="70" y="${HEIGHT - 200}" fill="#ffffff" font-size="38" font-family="Inter, sans-serif">
-        ${escapeXml(caption)}
+      
+      <!-- Speech bubble for caption -->
+      <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
+      <!-- Speech bubble tail -->
+      <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
+      
+      <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+      
+      <!-- Caption text in speech bubble -->
+      <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
+        ${escapeXml(caption.toUpperCase())}
       </text>
-      <text x="70" y="${HEIGHT - 40}" fill="#a1a1aa" font-size="22" font-family="Inter, sans-serif">@drama.studio</text>
-      <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="24" font-family="Inter, sans-serif" font-weight="bold">
+      
+      <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
+      <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="32" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#textShadow)">
         Comic Book Style - Freepik API not configured
       </text>
     </svg>
@@ -157,15 +194,32 @@ async function composePanelsFallback(episodeId: string, captions: string[], epNu
             <stop offset="0%" stop-color="#0a0a0a"/>
             <stop offset="100%" stop-color="#1f1f1f"/>
           </linearGradient>
+          <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.8"/>
+          </filter>
+          <filter id="episodeShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="4" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.9"/>
+          </filter>
+          <filter id="speechBubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000000" flood-opacity="0.6"/>
+          </filter>
         </defs>
         <rect width="100%" height="100%" fill="url(#g)"/>
-        <rect x="40" y="${HEIGHT - 260}" width="${WIDTH - 80}" height="200" rx="16" fill="rgba(0,0,0,0.55)" />
-        <text x="${WIDTH - 120}" y="80" text-anchor="end" fill="#ffffff" font-size="44" font-family="Inter, sans-serif">Ep ${epNumber}</text>
-        <text x="70" y="${HEIGHT - 200}" fill="#ffffff" font-size="38" font-family="Inter, sans-serif">
-          ${escapeXml(caption)}
+        
+        <!-- Speech bubble for caption -->
+        <ellipse cx="${WIDTH/2}" cy="${HEIGHT - 180}" rx="${WIDTH/2 - 40}" ry="80" fill="white" stroke="#000000" stroke-width="4" filter="url(#speechBubbleShadow)"/>
+        <!-- Speech bubble tail -->
+        <polygon points="${WIDTH/2 - 20},${HEIGHT - 100} ${WIDTH/2 + 20},${HEIGHT - 100} ${WIDTH/2},${HEIGHT - 80}" fill="white" stroke="#000000" stroke-width="4"/>
+        
+        <text x="${WIDTH - 100}" y="100" text-anchor="end" fill="#ffffff" font-size="72" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#episodeShadow)">Ep ${epNumber}</text>
+        
+        <!-- Caption text in speech bubble -->
+        <text x="${WIDTH/2}" y="${HEIGHT - 190}" text-anchor="middle" fill="#000000" font-size="42" font-family="Impact, Arial Black, sans-serif" font-weight="bold">
+          ${escapeXml(caption.toUpperCase())}
         </text>
-        <text x="70" y="${HEIGHT - 40}" fill="#a1a1aa" font-size="22" font-family="Inter, sans-serif">@drama.studio</text>
-        <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="24" font-family="Inter, sans-serif" font-weight="bold">
+        
+        <text x="60" y="${HEIGHT - 50}" fill="#ffd700" font-size="28" font-family="Arial, sans-serif" font-weight="bold" filter="url(#textShadow)">@drama.studio</text>
+        <text x="${WIDTH/2}" y="${HEIGHT/2}" text-anchor="middle" fill="#666" font-size="32" font-family="Impact, Arial Black, sans-serif" font-weight="bold" filter="url(#textShadow)">
           Comic Book Style - Placeholder
         </text>
       </svg>
