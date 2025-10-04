@@ -9,11 +9,7 @@ interface FreepikTaskResponse {
   data: {
     task_id: string;
     status: 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
-    generated: Array<{
-      id: string;
-      url: string;
-      download_url: string;
-    }>;
+    generated: string[];
     has_nsfw?: boolean[];
     error?: string;
   };
@@ -29,6 +25,7 @@ export class FreepikService {
 
   async generateImage(request: FreepikImageRequest): Promise<string> {
     try {
+      console.log('request----1', request);
       // Start image generation
       const response = await fetch(`${this.baseUrl}/mystic`, {
         method: 'POST',
@@ -39,7 +36,7 @@ export class FreepikService {
         },
         body: JSON.stringify(request),
       });
-
+      console.log('response----2', response);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Freepik API error response:', errorText);
@@ -47,22 +44,29 @@ export class FreepikService {
       }
 
       const taskData: FreepikTaskResponse = await response.json();
-      
+      console.log('taskData----3', taskData);
       if (!taskData.data.task_id) {
         throw new Error('No task ID returned from Freepik API');
       }
 
       // Poll for completion
-      return await this.pollForCompletion(taskData.data.task_id);
+      const result = await this.pollForCompletion(taskData.data.task_id);
+      console.log('result----5', result);
+      return result;
     } catch (error) {
       console.error('Freepik image generation failed:', error);
+      console.log('error----4', error);
       throw error;
     }
   }
 
   private async pollForCompletion(taskId: string, maxAttempts = 30): Promise<string> {
+    console.log(`Starting polling for task: ${taskId}`);
+    
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
+        console.log(`Poll attempt ${attempt + 1}/${maxAttempts} for task: ${taskId}`);
+        
         const response = await fetch(`${this.baseUrl}/mystic/${taskId}`, {
           headers: {
             'Accept': 'application/json',
@@ -75,22 +79,28 @@ export class FreepikService {
         }
 
         const taskData: FreepikTaskResponse = await response.json();
+        console.log(`Poll attempt ${attempt + 1} response:`, taskData);
 
         if (taskData.data.status === 'COMPLETED' && taskData.data.generated.length > 0) {
-          return taskData.data.generated[0].download_url;
+          console.log(`Image generation completed! Download URL: ${taskData.data.generated[0]}`);
+          return taskData.data.generated[0];
         }
 
         if (taskData.data.status === 'FAILED') {
           throw new Error(`Image generation failed: ${taskData.data.error || 'Unknown error'}`);
         }
 
+        console.log(`Task status: ${taskData.data.status}, waiting before next poll...`);
+        
         // Wait before next poll (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(1.5, attempt), 10000)));
+        const waitTime = Math.min(1000 * Math.pow(1.5, attempt), 10000);
+        console.log(`Waiting ${waitTime}ms before next poll...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       } catch (error) {
+        console.error(`Poll attempt ${attempt + 1} failed:`, error);
         if (attempt === maxAttempts - 1) {
           throw error;
         }
-        console.warn(`Poll attempt ${attempt + 1} failed:`, error);
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
@@ -128,6 +138,8 @@ export class FreepikService {
 
 export function getFreepikService(): FreepikService | null {
   const apiKey = process.env.FREEPIK_API_KEY;
+
+  console.log('apiKey', apiKey);
   if (!apiKey || apiKey === 'your_freepik_api_key_here') {
     return null;
   }

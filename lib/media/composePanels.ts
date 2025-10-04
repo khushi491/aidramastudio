@@ -6,7 +6,8 @@ const HEIGHT = 1350;
 
 export async function composePanels(episodeId: string, captions: string[], epNumber: number): Promise<string[]> {
   const urls: string[] = [];
-  for (let i = 0; i < 6; i++) {
+  // Generate only 1 panel for testing
+  for (let i = 0; i < 1; i++) {
     const caption = captions[i] ?? `Panel ${i + 1}`;
     // Simple placeholder panel with dark background and overlay, no external assets to avoid network
     const svg = `

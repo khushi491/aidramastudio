@@ -15,7 +15,8 @@ export async function composePanelsWithFreepik(episodeId: string, captions: stri
 
   const urls: string[] = [];
   
-  for (let i = 0; i < 6; i++) {
+  // Generate only 1 panel for testing
+  for (let i = 0; i < 1; i++) {
     const caption = captions[i] ?? `Panel ${i + 1}`;
     
     try {
@@ -146,7 +147,8 @@ async function createFallbackPanel(episodeId: string, caption: string, epNumber:
 // Fallback function (original implementation)
 async function composePanelsFallback(episodeId: string, captions: string[], epNumber: number): Promise<string[]> {
   const urls: string[] = [];
-  for (let i = 0; i < 6; i++) {
+  // Generate only 1 panel for testing
+  for (let i = 0; i < 1; i++) {
     const caption = captions[i] ?? `Panel ${i + 1}`;
     const svg = `
       <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
